@@ -1,0 +1,8 @@
+# Persönliche Daten, API-Keys & generierte Dokumente nicht hochladen
+data/
+output/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+~$*.docx

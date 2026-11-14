@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BewerbungsTerminal</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- SCHLANKE KOPFZEILE -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="terminal-prompt">&gt;_</span>
+      <span class="app-name">BewerbungsTerminal</span>
+      <span class="app-tag">Portabel</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-subtle" id="aiStatusPill" title="KI-Einstellungen ändern">
+        <span class="dot-online"></span>
+        <span id="aiStatusText">Smart-Lokal</span>
+      </button>
+      <button class="btn-subtle" id="btnOpenOutputDir">📁 Fertige Dateien</button>
+      <button class="btn-subtle" id="btnOpenLayoutsDir">📂 Layouts-Ordner</button>
+      <button class="btn-subtle" id="btnOpenSettings">⚙️ Einstellungen</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ZWISCHEN LINKS & RECHTS ETWAS OBERHALB: WORD-LAYOUTS (.DOCX) -->
+    <section class="layout-center-dock">
+      <div class="dock-box">
+        <div class="docx-drop" id="docxDropzone" title="Klicken oder .docx-Vorlage hierher ziehen">
+          <span class="docx-drop-icon">📄</span>
+          <div class="docx-drop-info">
+            <strong>Word-Layout (.docx) hier ablegen</strong>
+            <span id="layoutCountBadge">0 Vorlagen gespeichert</span>
+          </div>
+          <input type="file" id="hiddenLayoutFileInput" accept=".docx" multiple hidden />
+        </div>
+
+        <div class="dock-selectors">
+          <div class="select-field">
+            <label for="selectCoverLayout">Anschreiben-Vorlage</label>
+            <div class="select-row">
+              <select id="selectCoverLayout" class="clean-select"></select>
+              <button class="icon-btn" id="btnOpenSelectedCover" title="In Word ansehen">↗</button>
+              <button class="icon-btn danger" id="btnDeleteCoverLayout" title="Vorlage löschen">✕</button>
+            </div>
+          </div>
+
+          <div class="select-field">
+            <label for="selectCvLayout">Lebenslauf-Vorlage</label>
+            <div class="select-row">
+              <select id="selectCvLayout" class="clean-select"></select>
+              <button class="icon-btn" id="btnOpenSelectedCv" title="In Word ansehen">↗</button>
+              <button class="icon-btn danger" id="btnDeleteCvLayout" title="Vorlage löschen">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HAUPTBEREICH: LINKS JOB-LINKS | RECHTS LEBENSLAUF -->
+    <section class="workspace-split">
+      <!-- LINKE SEITE: JOB-LINKS -->
+      <div class="pane">
+        <div class="pane-head">
+          <h2>Job-Links</h2>
+          <div class="pane-actions">
+            <button class="btn-subtle btn-xs" id="btnAddJobSlot">+ Feld</button>
+            <button class="btn-subtle btn-xs" id="btnClearEmptyJobs">Leere entfernen</button>
+          </div>
+        </div>
+
+        <div class="job-list" id="jobSlotsList"></div>
+
+        <div class="drop-hint-bar" id="multiLinkDropzone">
+          + Job-Link(s) per Drag &amp; Drop hier ablegen oder klicken
+        </div>
+      </div>
+
+      <!-- RECHTE SEITE: PERSONALISIERTER LEBENSLAUF -->
+      <div class="pane" id="cvDropPanel">
+        <div class="pane-head">
+          <h2>Personalisierter Lebenslauf</h2>
+          <div class="pane-actions">
+            <span class="save-state" id="cvSaveIndicator">Gespeichert</span>
+            <button class="btn-subtle btn-xs" id="btnImportCvFile">📄 .docx / .txt laden</button>
+            <input type="file" id="hiddenCvFileInput" accept=".txt,.docx" hidden />
+          </div>
+        </div>
+
+        <textarea
+          id="cvTextEditor"
+          class="cv-input"
+          placeholder="Deinen Lebenslauf hier als Text einfügen (oder .docx / .txt Datei per Drag &amp; Drop ablegen)..."
+          spellcheck="false"
+        ></textarea>
+      </div>
+    </section>
+
+    <!-- ZENTRALE AKTIONSLEISTE -->
+    <section class="action-bar">
+      <button class="btn-primary-main" id="btnProcessAllJobs">
+        ⚡ Alle Stellen erstellen &amp; mit Layout mergen
+      </button>
+      <div class="action-status">
+        <span id="bridgeProgressText">Bereit</span>
+        <button class="btn-link" id="btnToggleLog">Protokoll anzeigen</button>
+      </div>
+    </section>
+
+    <!-- ERGEBNISSE (ERSCHEINEN ÜBERSICHTLICH SOBALD VORHANDEN) -->
+    <section class="results-section" id="resultsSection" hidden>
+      <div class="results-head">
+        <h3>Fertige Bewerbungsunterlagen</h3>
+        <button class="btn-subtle btn-xs" id="btnOpenOutputDirBottom">📁 Alle im Ordner öffnen</button>
+      </div>
+      <div id="resultsContainer" class="results-grid"></div>
+    </section>
+
+    <!-- KOMPAKTES TERMINAL-PROTOKOLL (STANDARDMÄSSIG EINGEKLAPPT) -->
+    <section class="log-drawer" id="logDrawer" hidden>
+      <div class="log-head">
+        <span>Terminal-Protokoll</span>
+        <button class="btn-link" id="btnClearLog">Leeren</button>
+      </div>
+      <div class="log-body" id="terminalLogOutput"></div>
+    </section>
+  </main>
+
+  <!-- EINSTELLUNGEN MODAL -->
+  <div class="modal-backdrop" id="settingsModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Einstellungen &amp; KI-Backend</h3>
+        <button class="icon-btn" id="btnCloseSettings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="cfgProvider">KI-Anbieter</label>
+          <select id="cfgProvider" class="clean-select">
+            <option value="smart_local">Smart-Lokal (Sofort aktiv, kein API-Key nötig)</option>
+            <option value="gemini">Google Gemini API</option>
+            <option value="openai">OpenAI API (GPT-4o)</option>
+            <option value="anthropic">Anthropic Claude API</option>
+            <option value="ollama">Ollama (Lokale KI)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cfgApiKey">API-Key (falls externer Anbieter gewählt)</label>
+          <input type="password" id="cfgApiKey" class="clean-input" placeholder="API-Schlüssel hier einfügen" />
+        </div>
+
+        <div class="form-group">
+          <label for="cfgModel">Modellname (optional)</label>
+          <input type="text" id="cfgModel" class="clean-input" placeholder="z. B. gemini-2.5-flash, gpt-4o-mini, llama3.1" />
+        </div>
+
+        <div class="form-group">
+          <label for="cfgOllamaUrl">Ollama URL (nur bei Ollama)</label>
+          <input type="text" id="cfgOllamaUrl" class="clean-input" placeholder="http://localhost:11434" />
+        </div>
+
+        <div class="hint-box">
+          <strong>Word-Vorlagen (.docx):</strong> Du kannst beliebige Word-Layouts ablegen (Textblöcke werden automatisch erkannt) oder Platzhalter wie <code>{{NAME}}</code>, <code>{{BETREFF}}</code>, <code>{{ANSCHREIBEN_TEXT}}</code>, <code>{{BERUFSERFAHRUNG}}</code>, <code>{{AUSBILDUNG}}</code>, <code>{{KENNTNISSE}}</code> verwenden.
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-primary-main" id="btnSaveConfig">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
