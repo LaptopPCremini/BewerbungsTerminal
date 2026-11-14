@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BewerbungsTerminal</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <!-- SCHLANKE KOPFZEILE -->
@@ -12,15 +13,14 @@
     <div class="topbar-left">
       <span class="terminal-prompt">&gt;_</span>
       <span class="app-name">BewerbungsTerminal</span>
-      <span class="app-tag">Portabel</span>
+      <span class="app-tag">Web / GitHub Pages</span>
     </div>
     <div class="topbar-right">
       <button class="btn-subtle" id="aiStatusPill" title="KI-Einstellungen ändern">
         <span class="dot-online"></span>
         <span id="aiStatusText">Smart-Lokal</span>
       </button>
-      <button class="btn-subtle" id="btnOpenOutputDir">📁 Fertige Dateien</button>
-      <button class="btn-subtle" id="btnOpenLayoutsDir">📂 Layouts-Ordner</button>
+      <button class="btn-subtle" id="btnDownloadAllZip" title="Alle generierten Word-Dokumente als ZIP herunterladen">📦 Alle als .zip</button>
       <button class="btn-subtle" id="btnOpenSettings">⚙️ Einstellungen</button>
     </div>
   </header>
@@ -33,7 +33,7 @@
           <span class="docx-drop-icon">📄</span>
           <div class="docx-drop-info">
             <strong>Word-Layout (.docx) hier ablegen</strong>
-            <span id="layoutCountBadge">0 Vorlagen gespeichert</span>
+            <span id="layoutCountBadge">0 Vorlagen im Browser</span>
           </div>
           <input type="file" id="hiddenLayoutFileInput" accept=".docx" multiple hidden />
         </div>
@@ -43,7 +43,7 @@
             <label for="selectCoverLayout">Anschreiben-Vorlage</label>
             <div class="select-row">
               <select id="selectCoverLayout" class="clean-select"></select>
-              <button class="icon-btn" id="btnOpenSelectedCover" title="In Word ansehen">↗</button>
+              <button class="icon-btn" id="btnOpenSelectedCover" title="Vorlage herunterladen">⬇</button>
               <button class="icon-btn danger" id="btnDeleteCoverLayout" title="Vorlage löschen">✕</button>
             </div>
           </div>
@@ -52,7 +52,7 @@
             <label for="selectCvLayout">Lebenslauf-Vorlage</label>
             <div class="select-row">
               <select id="selectCvLayout" class="clean-select"></select>
-              <button class="icon-btn" id="btnOpenSelectedCv" title="In Word ansehen">↗</button>
+              <button class="icon-btn" id="btnOpenSelectedCv" title="Vorlage herunterladen">⬇</button>
               <button class="icon-btn danger" id="btnDeleteCvLayout" title="Vorlage löschen">✕</button>
             </div>
           </div>
@@ -114,7 +114,7 @@
     <section class="results-section" id="resultsSection" hidden>
       <div class="results-head">
         <h3>Fertige Bewerbungsunterlagen</h3>
-        <button class="btn-subtle btn-xs" id="btnOpenOutputDirBottom">📁 Alle im Ordner öffnen</button>
+        <button class="btn-subtle btn-xs" id="btnDownloadAllZipBottom">📦 Alle als .zip herunterladen</button>
       </div>
       <div id="resultsContainer" class="results-grid"></div>
     </section>
@@ -138,7 +138,7 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="cfgProvider">KI-Anbieter</label>
+          <label for="cfgProvider">KI-Anbieter (läuft direkt aus dem Browser)</label>
           <select id="cfgProvider" class="clean-select">
             <option value="smart_local">Smart-Lokal (Sofort aktiv, kein API-Key nötig)</option>
             <option value="gemini">Google Gemini API</option>
@@ -149,7 +149,7 @@
         </div>
 
         <div class="form-group">
-          <label for="cfgApiKey">API-Key (falls externer Anbieter gewählt)</label>
+          <label for="cfgApiKey">API-Key (wird nur lokal in deinem Browser gespeichert)</label>
           <input type="password" id="cfgApiKey" class="clean-input" placeholder="API-Schlüssel hier einfügen" />
         </div>
 
@@ -163,8 +163,13 @@
           <input type="text" id="cfgOllamaUrl" class="clean-input" placeholder="http://localhost:11434" />
         </div>
 
+        <label class="checkbox-row">
+          <input type="checkbox" id="cfgCorsProxy" checked />
+          <span>Kostenlosen CORS-Proxy für Job-Links verwenden (um Webseiten im Browser abzurufen)</span>
+        </label>
+
         <div class="hint-box">
-          <strong>Word-Vorlagen (.docx):</strong> Du kannst beliebige Word-Layouts ablegen (Textblöcke werden automatisch erkannt) oder Platzhalter wie <code>{{NAME}}</code>, <code>{{BETREFF}}</code>, <code>{{ANSCHREIBEN_TEXT}}</code>, <code>{{BERUFSERFAHRUNG}}</code>, <code>{{AUSBILDUNG}}</code>, <code>{{KENNTNISSE}}</code> verwenden.
+          <strong>Word-Vorlagen (.docx):</strong> Du kannst beliebige Word-Layouts ablegen (Textblöcke werden automatisch erkannt) oder Platzhalter wie <code>{{NAME}}</code>, <code>{{BETREFF}}</code>, <code>{{ANSCHREIBEN_TEXT}}</code>, <code>{{BERUFSERFAHRUNG}}</code>, <code>{{AUSBILDUNG}}</code>, <code>{{KENNTNISSE}}</code> verwenden. Alle Vorlagen bleiben dauerhaft in deinem Browser (IndexedDB) gespeichert.
         </div>
 
         <div class="modal-footer">
@@ -174,6 +179,6 @@
     </div>
   </div>
 
-  <script src="/app.js"></script>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>

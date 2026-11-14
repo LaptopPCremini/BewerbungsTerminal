@@ -671,6 +671,15 @@ body {
   margin-top: 4px;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
 @media (max-width: 960px) {
   .dock-box,
   .dock-selectors,
